@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chargement | Lunaris RP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            color: white; 
+            text-align: center; 
+            overflow: hidden; 
+            background: black;
+        }
+
+        /* Conteneur pour le diaporama */
+        #slideshow {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1s ease-in-out;
+            filter: brightness(0.7);
+        }
+
+        /* Contenu principal */
+        #content {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        #avatar {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        #username {
+            margin-top: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #loading-text {
+            margin-top: 20px;
+            font-size: 20px;
+            opacity: 0.8;
+        }
+
+        /* Barre de progression */
+        #progress-container {
+            width: 80%; max-width: 400px; 
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #progress-bar {
+            width: 0%; height: 20px;
+            background: #00AEEF; 
+            transition: width 0.5s;
+        }
+
+        /* Copyright en bas à gauche */
+        #copyright {
+            position: fixed;
+            bottom: 10px;
+            left: 20px;
+            font-size: 14px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Diaporama en fond -->
+    <div id="slideshow"></div>
+
+    <!-- Contenu -->
+    <div id="content">
+        <img id="avatar" src="https://steamcommunity-a.akamaihd.net/public/images/avatars/ee/eeff5f6a99ff69d0b0d725e77e3b7f3e5e45e2bb_full.jpg" alt="Avatar Steam">
+        <p id="username">Pseudo</p>
+        <p id="loading-text">Connexion au serveur...</p>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- Musique de fond -->
+    <audio id="background-music" autoplay loop>
+        <source src="sound/lunaris/music.mp3" type="audio/mp3">
+    </audio>
+
+    <!-- Copyright -->
+    <p id="copyright">© 2025 Lunaris RP - Tous droits réservés</p>
+
+    <script>
+        let progress = 0;
+        function updateLoading() {
+            if (progress < 100) {
+                progress += Math.random() * 10;
+                document.getElementById("progress-bar").style.width = progress + "%";
+                setTimeout(updateLoading, 500);
+            } else {
+                document.getElementById("loading-text").textContent = "Téléchargement terminé. Préparation...";
+            }
+        }
+        updateLoading();
+
+        // Réglage du volume de la musique
+        document.getElementById("background-music").volume = 0.2;
+
+        // Récupération des infos Steam
+        function getSteamInfo() {
+            let steamID = new URLSearchParams(window.location.search).get('steamid');
+            if (steamID) {
+                fetch(`https://steamcommunity.com/profiles/${steamID}?xml=1`)
+                    .then(response => response.text())
+                    .then(data => {
+                        let parser = new DOMParser();
+                        let xml = parser.parseFromString(data, "text/xml");
+                        let avatar = xml.getElementsByTagName("avatarFull")[0].textContent;
+                        let username = xml.getElementsByTagName("steamID")[0].textContent;
+
+                        document.getElementById("avatar").src = avatar;
+                        document.getElementById("username").textContent = username;
+                    });
+            }
+        }
+
+        getSteamInfo();
+
+        // Images du diaporama
+        const images = [
+            "img/1.jpg",
+            "img/2.jpg",
+            "img/3.jpg"
+        ];
+
+        let index = 0;
+        function changeBackground() {
+            document.getElementById("slideshow").style.backgroundImage = `url(${images[index]})`;
+            index = (index + 1) % images.length;
+        }
+
+        // Changement d'image toutes les 5 secondes
+        setInterval(changeBackground, 10000);
+        changeBackground();
+    </script>
+
+</body>
+</html>
